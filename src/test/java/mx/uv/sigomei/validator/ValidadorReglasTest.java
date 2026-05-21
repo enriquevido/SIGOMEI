@@ -217,7 +217,3 @@ class ValidadorReglasTest {
                 "NivelII es el valor limite inferior valido segun RN-07");
     }
 }
-
-
-
-
