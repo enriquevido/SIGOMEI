@@ -1,5 +1,15 @@
 package mx.uv.sigomei.validator;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import mx.uv.sigomei.domain.Equipo;
 import mx.uv.sigomei.domain.OrdenMantenimiento;
 import mx.uv.sigomei.domain.Tecnico;
@@ -9,16 +19,6 @@ import mx.uv.sigomei.enums.EstatusTecnico;
 import mx.uv.sigomei.enums.NivelCertificacion;
 import mx.uv.sigomei.enums.TipoEquipo;
 import mx.uv.sigomei.exception.ReglaNegocioException;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ValidadorReglasTest {
     private final ValidadorReglas validador = new ValidadorReglasImpl();
@@ -31,7 +31,20 @@ class ValidadorReglasTest {
         Tecnico tecnico = tecnico(TipoEquipo.ELECTRICO, NivelCertificacion.II, EstatusTecnico.ACTIVO);
 
         // When / Then
-        assertThrows(ReglaNegocioException.class, () -> validador.validarEspecialidad(equipo, tecnico));
+        assertThrows(ReglaNegocioException.class,
+                () -> validador.validarEspecialidad(equipo, tecnico));
+    }
+
+    @Test
+    @DisplayName("RN-01 debe permitir tecnico con especialidad igual al tipo de equipo")
+    void rn01_debePermitirTecnicoConEspecialidadIgualAlTipoEquipo() {
+        // Given
+        Equipo equipo = equipo(TipoEquipo.MECANICO, Criticidad.MEDIA);
+        Tecnico tecnico = tecnico(TipoEquipo.MECANICO, NivelCertificacion.II, EstatusTecnico.ACTIVO);
+
+        // When / Then
+        assertDoesNotThrow(
+                () -> validador.validarEspecialidad(equipo, tecnico));
     }
 
     @Test
@@ -48,13 +61,41 @@ class ValidadorReglasTest {
     }
 
     @Test
+    @DisplayName("RN-02 debe permitir orden cuando la fecha programada es diferente")
+    void rn02_debePermitirOrdenCuandoFechaProgramadaEsDiferente() {
+        // Given
+        Equipo equipo = equipo(TipoEquipo.MECANICO, Criticidad.MEDIA);
+
+        LocalDate fechaExistente = LocalDate.of(2026, 6, 1);
+        LocalDate fechaNueva = LocalDate.of(2026, 7, 1);
+
+        OrdenMantenimiento existente = orden(equipo, fechaExistente, null, null, EstadoOrden.PROGRAMADA);
+
+        // When / Then
+        assertDoesNotThrow(
+                () -> validador.validarOrdenActivaDuplicada(equipo, fechaNueva, List.of(existente)));
+    }
+
+    @Test
     @DisplayName("RN-03 debe rechazar tecnico inactivo")
     void rn03_debeRechazarTecnicoInactivo() {
         // Given
         Tecnico tecnico = tecnico(TipoEquipo.HIDRAULICO, NivelCertificacion.II, EstatusTecnico.INACTIVO);
 
         // When / Then
-        assertThrows(ReglaNegocioException.class, () -> validador.validarTecnicoActivo(tecnico));
+        assertThrows(ReglaNegocioException.class,
+                () -> validador.validarTecnicoActivo(tecnico));
+    }
+
+    @Test
+    @DisplayName("RN-03 debe permitir tecnico activo")
+    void rn03_debePermitirTecnicoActivo() {
+        // Given
+        Tecnico tecnico = tecnico(TipoEquipo.HIDRAULICO, NivelCertificacion.II, EstatusTecnico.ACTIVO);
+
+        // When / Then
+        assertDoesNotThrow(
+                () -> validador.validarTecnicoActivo(tecnico));
     }
 
     @Test
