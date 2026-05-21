@@ -1,5 +1,14 @@
 package mx.uv.sigomei.validator;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import mx.uv.sigomei.domain.Equipo;
 import mx.uv.sigomei.domain.OrdenMantenimiento;
 import mx.uv.sigomei.domain.Tecnico;
@@ -9,17 +18,9 @@ import mx.uv.sigomei.enums.EstatusTecnico;
 import mx.uv.sigomei.enums.NivelCertificacion;
 import mx.uv.sigomei.enums.TipoEquipo;
 import mx.uv.sigomei.exception.ReglaNegocioException;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ValidadorReglasTest {
+
     private final ValidadorReglas validador = new ValidadorReglasImpl();
 
     @Test
@@ -30,7 +31,20 @@ class ValidadorReglasTest {
         Tecnico tecnico = tecnico(TipoEquipo.ELECTRICO, NivelCertificacion.II, EstatusTecnico.ACTIVO);
 
         // When / Then
-        assertThrows(ReglaNegocioException.class, () -> validador.validarEspecialidad(equipo, tecnico));
+        assertThrows(ReglaNegocioException.class,
+                () -> validador.validarEspecialidad(equipo, tecnico));
+    }
+
+    @Test
+    @DisplayName("RN-01 debe permitir tecnico con especialidad igual al tipo de equipo")
+    void rn01_debePermitirTecnicoConEspecialidadIgualAlTipoEquipo() {
+        // Given
+        Equipo equipo = equipo(TipoEquipo.MECANICO, Criticidad.MEDIA);
+        Tecnico tecnico = tecnico(TipoEquipo.MECANICO, NivelCertificacion.II, EstatusTecnico.ACTIVO);
+
+        // When / Then
+        assertDoesNotThrow(
+                () -> validador.validarEspecialidad(equipo, tecnico));
     }
 
     @Test
@@ -39,21 +53,78 @@ class ValidadorReglasTest {
         // Given
         Equipo equipo = equipo(TipoEquipo.MECANICO, Criticidad.MEDIA);
         LocalDate fecha = LocalDate.of(2026, 6, 1);
-        OrdenMantenimiento existente = orden(equipo, fecha, null, null, EstadoOrden.PROGRAMADA);
+
+        OrdenMantenimiento ordenExistente = orden(
+                equipo,
+                fecha,
+                null,
+                null,
+                EstadoOrden.PROGRAMADA
+        );
 
         // When / Then
         assertThrows(ReglaNegocioException.class,
-                () -> validador.validarOrdenActivaDuplicada(equipo, fecha, List.of(existente)));
+                () -> validador.validarOrdenActivaDuplicada(
+                        equipo,
+                        fecha,
+                        List.of(ordenExistente)
+                ));
+    }
+
+    @Test
+    @DisplayName("RN-02 debe permitir orden cuando la fecha programada es diferente")
+    void rn02_debePermitirOrdenCuandoFechaProgramadaEsDiferente() {
+        // Given
+        Equipo equipo = equipo(TipoEquipo.MECANICO, Criticidad.MEDIA);
+
+        LocalDate fechaOrdenExistente = LocalDate.of(2026, 6, 1);
+        LocalDate fechaNuevaOrden = LocalDate.of(2026, 7, 1);
+
+        OrdenMantenimiento ordenExistente = orden(
+                equipo,
+                fechaOrdenExistente,
+                null,
+                null,
+                EstadoOrden.PROGRAMADA
+        );
+
+        // When / Then
+        assertDoesNotThrow(
+                () -> validador.validarOrdenActivaDuplicada(
+                        equipo,
+                        fechaNuevaOrden,
+                        List.of(ordenExistente)
+                ));
     }
 
     @Test
     @DisplayName("RN-03 debe rechazar tecnico inactivo")
     void rn03_debeRechazarTecnicoInactivo() {
         // Given
-        Tecnico tecnico = tecnico(TipoEquipo.HIDRAULICO, NivelCertificacion.II, EstatusTecnico.INACTIVO);
+        Tecnico tecnico = tecnico(
+                TipoEquipo.HIDRAULICO,
+                NivelCertificacion.II,
+                EstatusTecnico.INACTIVO
+        );
 
         // When / Then
-        assertThrows(ReglaNegocioException.class, () -> validador.validarTecnicoActivo(tecnico));
+        assertThrows(ReglaNegocioException.class,
+                () -> validador.validarTecnicoActivo(tecnico));
+    }
+
+    @Test
+    @DisplayName("RN-03 debe permitir tecnico activo")
+    void rn03_debePermitirTecnicoActivo() {
+        // Given
+        Tecnico tecnico = tecnico(
+                TipoEquipo.HIDRAULICO,
+                NivelCertificacion.II,
+                EstatusTecnico.ACTIVO
+        );
+
+        // When / Then
+        assertDoesNotThrow(
+                () -> validador.validarTecnicoActivo(tecnico));
     }
 
     @Test
@@ -61,17 +132,26 @@ class ValidadorReglasTest {
     void rn04_debeRechazarEliminacionConOrdenesRegistradas() {
         // Given
         Equipo equipo = equipo(TipoEquipo.ELECTRICO, Criticidad.BAJA);
-        OrdenMantenimiento orden = orden(equipo, LocalDate.of(2026, 6, 1), null, null, EstadoOrden.PROGRAMADA);
+
+        OrdenMantenimiento orden = orden(
+                equipo,
+                LocalDate.of(2026, 6, 1),
+                null,
+                null,
+                EstadoOrden.PROGRAMADA
+        );
 
         // When / Then
-        assertThrows(ReglaNegocioException.class, () -> validador.validarEliminacionSinOrdenes(List.of(orden)));
+        assertThrows(ReglaNegocioException.class,
+                () -> validador.validarEliminacionSinOrdenes(List.of(orden)));
     }
 
     @Test
     @DisplayName("RN-04 debe permitir eliminacion sin ordenes registradas")
     void rn04_debePermitirEliminacionSinOrdenesRegistradas() {
         // When / Then
-        assertDoesNotThrow(() -> validador.validarEliminacionSinOrdenes(List.of()));
+        assertDoesNotThrow(
+                () -> validador.validarEliminacionSinOrdenes(List.of()));
     }
 
     @Test
@@ -79,6 +159,7 @@ class ValidadorReglasTest {
     void rn05_debeRechazarFechasIncoherentes() {
         // Given
         Equipo equipo = equipo(TipoEquipo.INSTRUMENTACION, Criticidad.MEDIA);
+
         OrdenMantenimiento orden = orden(
                 equipo,
                 LocalDate.of(2026, 6, 1),
@@ -88,7 +169,8 @@ class ValidadorReglasTest {
         );
 
         // When / Then
-        assertThrows(ReglaNegocioException.class, () -> validador.validarFechas(orden));
+        assertThrows(ReglaNegocioException.class,
+                () -> validador.validarFechas(orden));
     }
 
     @Test
@@ -96,6 +178,7 @@ class ValidadorReglasTest {
     void rn05_debePermitirFechasCoherentes() {
         // Given
         Equipo equipo = equipo(TipoEquipo.INSTRUMENTACION, Criticidad.MEDIA);
+
         OrdenMantenimiento orden = orden(
                 equipo,
                 LocalDate.of(2026, 6, 1),
@@ -105,7 +188,8 @@ class ValidadorReglasTest {
         );
 
         // When / Then
-        assertDoesNotThrow(() -> validador.validarFechas(orden));
+        assertDoesNotThrow(
+                () -> validador.validarFechas(orden));
     }
 
     @Test
@@ -113,6 +197,7 @@ class ValidadorReglasTest {
     void rn06_debeRechazarOrdenFinalizadaSinCostoRealOFechaCierre() {
         // Given
         Equipo equipo = equipo(TipoEquipo.MECANICO, Criticidad.ALTA);
+
         OrdenMantenimiento orden = orden(
                 equipo,
                 LocalDate.of(2026, 6, 1),
@@ -120,10 +205,12 @@ class ValidadorReglasTest {
                 null,
                 EstadoOrden.FINALIZADA
         );
+
         orden.setCostoReal(null);
 
         // When / Then
-        assertThrows(ReglaNegocioException.class, () -> validador.validarDatosFinalizacion(orden));
+        assertThrows(ReglaNegocioException.class,
+                () -> validador.validarDatosFinalizacion(orden));
     }
 
     @Test
@@ -131,6 +218,7 @@ class ValidadorReglasTest {
     void rn06_debePermitirOrdenFinalizadaConCostoRealYFechaCierre() {
         // Given
         Equipo equipo = equipo(TipoEquipo.MECANICO, Criticidad.ALTA);
+
         OrdenMantenimiento orden = orden(
                 equipo,
                 LocalDate.of(2026, 6, 1),
@@ -138,10 +226,12 @@ class ValidadorReglasTest {
                 LocalDate.of(2026, 6, 3),
                 EstadoOrden.FINALIZADA
         );
+
         orden.setCostoReal(BigDecimal.valueOf(1300));
 
         // When / Then
-        assertDoesNotThrow(() -> validador.validarDatosFinalizacion(orden));
+        assertDoesNotThrow(
+                () -> validador.validarDatosFinalizacion(orden));
     }
 
     @Test
@@ -152,7 +242,8 @@ class ValidadorReglasTest {
         Tecnico tecnico = tecnico(TipoEquipo.ELECTRICO, NivelCertificacion.I, EstatusTecnico.ACTIVO);
 
         // When / Then
-        assertThrows(ReglaNegocioException.class, () -> validador.validarCriticidadAlta(equipo, tecnico));
+        assertThrows(ReglaNegocioException.class,
+                () -> validador.validarCriticidadAlta(equipo, tecnico));
     }
 
     private Equipo equipo(TipoEquipo tipo, Criticidad criticidad) {
@@ -170,7 +261,11 @@ class ValidadorReglasTest {
         );
     }
 
-    private Tecnico tecnico(TipoEquipo especialidad, NivelCertificacion nivelCertificacion, EstatusTecnico estatus) {
+    private Tecnico tecnico(
+            TipoEquipo especialidad,
+            NivelCertificacion nivelCertificacion,
+            EstatusTecnico estatus
+    ) {
         return new Tecnico(
                 1L,
                 "Tecnico SIGOMEI",
@@ -184,8 +279,13 @@ class ValidadorReglasTest {
         );
     }
 
-    private OrdenMantenimiento orden(Equipo equipo, LocalDate fechaProgramada, LocalDate fechaInicio,
-                                     LocalDate fechaCierre, EstadoOrden estadoOrden) {
+    private OrdenMantenimiento orden(
+            Equipo equipo,
+            LocalDate fechaProgramada,
+            LocalDate fechaInicio,
+            LocalDate fechaCierre,
+            EstadoOrden estadoOrden
+    ) {
         return new OrdenMantenimiento(
                 1L,
                 equipo,
