@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ValidadorReglasTest {
     private final ValidadorReglas validador = new ValidadorReglasImpl();
@@ -200,4 +201,23 @@ class ValidadorReglasTest {
                 estadoOrden
         );
     }
+
+    @Test
+    @DisplayName("RN-07 debe permitir tecnico con certificacion II en equipo de criticidad ALTA")
+    void rn07_debePermitirCertificacionIIEnEquipoAltaCriticidad() {
+        // Given
+        Equipo equipo = equipo(TipoEquipo.ELECTRICO, Criticidad.ALTA);
+        Tecnico tecnico = tecnico(TipoEquipo.ELECTRICO, NivelCertificacion.II, EstatusTecnico.ACTIVO);
+
+        // When / Then
+        assertDoesNotThrow(() -> validador.validarCriticidadAlta(equipo, tecnico));
+        assertEquals(Criticidad.ALTA, equipo.getCriticidad(),
+                "El equipo es ALTA criticidad, la regla aplica");
+        assertEquals(NivelCertificacion.II, tecnico.getNivelCertificacion(),
+                "NivelII es el valor limite inferior valido segun RN-07");
+    }
 }
+
+
+
+
