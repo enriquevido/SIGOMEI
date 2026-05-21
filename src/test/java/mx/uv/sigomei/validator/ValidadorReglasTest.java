@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ValidadorReglasTest {
@@ -67,6 +68,13 @@ class ValidadorReglasTest {
     }
 
     @Test
+    @DisplayName("RN-04 debe permitir eliminacion sin ordenes registradas")
+    void rn04_debePermitirEliminacionSinOrdenesRegistradas() {
+        // When / Then
+        assertDoesNotThrow(() -> validador.validarEliminacionSinOrdenes(List.of()));
+    }
+
+    @Test
     @DisplayName("RN-05 debe rechazar fechas incoherentes")
     void rn05_debeRechazarFechasIncoherentes() {
         // Given
@@ -81,6 +89,23 @@ class ValidadorReglasTest {
 
         // When / Then
         assertThrows(ReglaNegocioException.class, () -> validador.validarFechas(orden));
+    }
+
+    @Test
+    @DisplayName("RN-05 debe permitir fechas coherentes")
+    void rn05_debePermitirFechasCoherentes() {
+        // Given
+        Equipo equipo = equipo(TipoEquipo.INSTRUMENTACION, Criticidad.MEDIA);
+        OrdenMantenimiento orden = orden(
+                equipo,
+                LocalDate.of(2026, 6, 1),
+                LocalDate.of(2026, 6, 2),
+                LocalDate.of(2026, 6, 5),
+                EstadoOrden.EN_EJECUCION
+        );
+
+        // When / Then
+        assertDoesNotThrow(() -> validador.validarFechas(orden));
     }
 
     @Test
@@ -99,6 +124,24 @@ class ValidadorReglasTest {
 
         // When / Then
         assertThrows(ReglaNegocioException.class, () -> validador.validarDatosFinalizacion(orden));
+    }
+
+    @Test
+    @DisplayName("RN-06 debe permitir orden finalizada con costo real y fecha de cierre")
+    void rn06_debePermitirOrdenFinalizadaConCostoRealYFechaCierre() {
+        // Given
+        Equipo equipo = equipo(TipoEquipo.MECANICO, Criticidad.ALTA);
+        OrdenMantenimiento orden = orden(
+                equipo,
+                LocalDate.of(2026, 6, 1),
+                LocalDate.of(2026, 6, 2),
+                LocalDate.of(2026, 6, 3),
+                EstadoOrden.FINALIZADA
+        );
+        orden.setCostoReal(BigDecimal.valueOf(1300));
+
+        // When / Then
+        assertDoesNotThrow(() -> validador.validarDatosFinalizacion(orden));
     }
 
     @Test
