@@ -38,13 +38,19 @@ public class ClienteSigomeiDemoApp {
         ITecnicoService tecnicoService = (ITecnicoService) registry.lookup(tecnicoName);
         IOrdenService ordenService = (IOrdenService) registry.lookup(ordenName);
 
+        String sufijo = String.valueOf(System.currentTimeMillis()).substring(7);
+
+        String numeroSerieDemo = "SN-DEMO-" + sufijo;
+        String rfcDemo = "DEMO800101" + sufijo;
+        String correoDemo = "demo" + sufijo + "@empresa.mx";
+
         EquipoDTO equipo = equipoService.registrarEquipo(new EquipoDTO(
                 null,
-                "Compresor Atlas",
+                "Compresor Demo " + sufijo,
                 TipoEquipo.MECANICO,
                 "Atlas Copco",
                 "GA55",
-                "SN-DEMO-001",
+                numeroSerieDemo,
                 "Planta Norte",
                 LocalDate.of(2022, 3, 15),
                 "Operativo",
@@ -55,10 +61,10 @@ public class ClienteSigomeiDemoApp {
 
         TecnicoDTO tecnicoValido = tecnicoService.registrarTecnico(new TecnicoDTO(
                 null,
-                "Lopez Hernandez Juan",
-                "LOHJ800101",
+                "Tecnico Demo " + sufijo,
+                rfcDemo,
                 "9211234567",
-                "juan@empresa.mx",
+                correoDemo,
                 TipoEquipo.MECANICO,
                 NivelCertificacion.III,
                 LocalDate.of(2020, 1, 10),

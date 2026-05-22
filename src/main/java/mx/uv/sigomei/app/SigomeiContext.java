@@ -3,9 +3,10 @@ package mx.uv.sigomei.app;
 import mx.uv.sigomei.repository.EquipoRepository;
 import mx.uv.sigomei.repository.OrdenRepository;
 import mx.uv.sigomei.repository.TecnicoRepository;
-import mx.uv.sigomei.repository.memory.InMemoryEquipoRepository;
-import mx.uv.sigomei.repository.memory.InMemoryOrdenRepository;
-import mx.uv.sigomei.repository.memory.InMemoryTecnicoRepository;
+import mx.uv.sigomei.repository.jdbc.DatabaseConnectionProvider;
+import mx.uv.sigomei.repository.jdbc.JdbcEquipoRepository;
+import mx.uv.sigomei.repository.jdbc.JdbcOrdenRepository;
+import mx.uv.sigomei.repository.jdbc.JdbcTecnicoRepository;
 import mx.uv.sigomei.service.EquipoService;
 import mx.uv.sigomei.service.OrdenService;
 import mx.uv.sigomei.service.TecnicoService;
@@ -19,11 +20,17 @@ import mx.uv.sigomei.validator.ValidadorReglasImpl;
 
 public class SigomeiContext {
 
-    private final EquipoRepository equipoRepository = new InMemoryEquipoRepository();
+    private final DatabaseConnectionProvider connectionProvider =
+            new DatabaseConnectionProvider(System.getProperty("sigomei.config", "config/server.properties"));
 
-    private final TecnicoRepository tecnicoRepository = new InMemoryTecnicoRepository();
+    private final EquipoRepository equipoRepository =
+            new JdbcEquipoRepository(connectionProvider);
 
-    private final OrdenRepository ordenRepository = new InMemoryOrdenRepository();
+    private final TecnicoRepository tecnicoRepository =
+            new JdbcTecnicoRepository(connectionProvider);
+
+    private final OrdenRepository ordenRepository =
+            new JdbcOrdenRepository(connectionProvider);
 
     private final ValidadorReglas validadorReglas = new ValidadorReglasImpl();
 

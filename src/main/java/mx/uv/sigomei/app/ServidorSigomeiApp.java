@@ -3,6 +3,7 @@ package mx.uv.sigomei.app;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 import mx.uv.sigomei.remote.impl.EquipoRemoteService;
 import mx.uv.sigomei.remote.impl.OrdenRemoteService;
@@ -51,5 +52,8 @@ public class ServidorSigomeiApp {
         System.out.println("Servicio publicado: " + equipoName);
         System.out.println("Servicio publicado: " + tecnicoName);
         System.out.println("Servicio publicado: " + ordenName);
+        System.out.println("Servidor esperando clientes. Presiona Ctrl + C para detenerlo.");
+
+        new CountDownLatch(1).await();
     }
 }
