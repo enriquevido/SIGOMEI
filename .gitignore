@@ -7,6 +7,7 @@ target/
 *.iws
 *.ipr
 out/
+logs/
 
 # macOS
 .DS_Store
@@ -17,3 +18,4 @@ Icon
 .Spotlight-V100
 .Trashes
 .cp.txt
+
