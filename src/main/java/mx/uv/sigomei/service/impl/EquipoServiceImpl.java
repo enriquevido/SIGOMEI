@@ -11,7 +11,10 @@ import mx.uv.sigomei.exception.ValidacionException;
 import mx.uv.sigomei.repository.EquipoRepository;
 import mx.uv.sigomei.repository.OrdenRepository;
 import mx.uv.sigomei.service.EquipoService;
+import mx.uv.sigomei.util.AuditLogger;
 import mx.uv.sigomei.validator.ValidadorReglas;
+
+import java.util.logging.Level;
 
 public class EquipoServiceImpl implements EquipoService {
 
@@ -32,7 +35,9 @@ public class EquipoServiceImpl implements EquipoService {
         validarEquipo(equipo);
         validarNumeroSerieUnico(equipo);
 
-        return equipoRepository.save(equipo);
+        Equipo resultado = equipoRepository.save(equipo);
+        AuditLogger.log(Level.INFO, "EquipoServiceImpl", "Equipo registrado con id: " + resultado.getId());
+        return resultado;
     }
 
     @Override
@@ -41,11 +46,13 @@ public class EquipoServiceImpl implements EquipoService {
             throw new ValidacionException("El id del equipo es obligatorio");
         }
 
+        AuditLogger.log(Level.INFO, "EquipoServiceImpl", "Consulta de equipo por id: " + id);
         return equipoRepository.findById(id);
     }
 
     @Override
     public List<Equipo> buscarTodos() {
+        AuditLogger.log(Level.INFO, "EquipoServiceImpl", "Consulta de todos los equipos");
         return equipoRepository.findAll();
     }
 
@@ -64,7 +71,9 @@ public class EquipoServiceImpl implements EquipoService {
 
         validarNumeroSerieUnicoAlModificar(equipo);
 
-        return equipoRepository.save(equipo);
+        Equipo resultado = equipoRepository.save(equipo);
+        AuditLogger.log(Level.INFO, "EquipoServiceImpl", "Equipo modificado con id: " + resultado.getId());
+        return resultado;
     }
 
     @Override
@@ -83,6 +92,7 @@ public class EquipoServiceImpl implements EquipoService {
         validadorReglas.validarEliminacionSinOrdenes(ordenesDelEquipo);
 
         equipoRepository.deleteById(id);
+        AuditLogger.log(Level.INFO, "EquipoServiceImpl", "Equipo eliminado con id: " + id);
     }
 
     private void validarEquipo(Equipo equipo) {

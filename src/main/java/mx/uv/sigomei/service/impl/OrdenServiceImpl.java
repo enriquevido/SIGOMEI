@@ -16,7 +16,10 @@ import mx.uv.sigomei.exception.ValidacionException;
 import mx.uv.sigomei.repository.OrdenRepository;
 import mx.uv.sigomei.service.OrdenService;
 import mx.uv.sigomei.state.GestorEstadoOrden;
+import mx.uv.sigomei.util.AuditLogger;
 import mx.uv.sigomei.validator.ValidadorReglas;
+
+import java.util.logging.Level;
 
 public class OrdenServiceImpl implements OrdenService {
     private final OrdenRepository ordenRepository;
@@ -49,7 +52,9 @@ public class OrdenServiceImpl implements OrdenService {
         validadorReglas.validarFechas(orden);
         validadorReglas.validarDatosFinalizacion(orden);
 
-        return ordenRepository.save(orden);
+        OrdenMantenimiento resultado = ordenRepository.save(orden);
+        AuditLogger.log(Level.INFO, "OrdenServiceImpl", "Orden creada con id: " + resultado.getId());
+        return resultado;
     }
 
     @Override
@@ -66,7 +71,9 @@ public class OrdenServiceImpl implements OrdenService {
 
         orden.setTecnico(tecnico);
 
-        return ordenRepository.save(orden);
+        OrdenMantenimiento resultado = ordenRepository.save(orden);
+        AuditLogger.log(Level.INFO, "OrdenServiceImpl", "Tecnico asignado a orden id: " + idOrden);
+        return resultado;
     }
 
     @Override
@@ -103,7 +110,9 @@ public class OrdenServiceImpl implements OrdenService {
         validadorReglas.validarFechas(orden);
         validadorReglas.validarDatosFinalizacion(orden);
 
-        return ordenRepository.save(orden);
+        OrdenMantenimiento resultado = ordenRepository.save(orden);
+        AuditLogger.log(Level.INFO, "OrdenServiceImpl", "Estado de orden " + idOrden + " cambiado a: " + nuevoEstado);
+        return resultado;
     }
 
     @Override
@@ -114,7 +123,9 @@ public class OrdenServiceImpl implements OrdenService {
 
         orden.setEstadoOrden(EstadoOrden.CANCELADA);
 
-        return ordenRepository.save(orden);
+        OrdenMantenimiento resultado = ordenRepository.save(orden);
+        AuditLogger.log(Level.INFO, "OrdenServiceImpl", "Orden cancelada con id: " + idOrden);
+        return resultado;
     }
 
     @Override
@@ -123,11 +134,13 @@ public class OrdenServiceImpl implements OrdenService {
             throw new ValidacionException("El id de la orden es obligatorio");
         }
 
+        AuditLogger.log(Level.INFO, "OrdenServiceImpl", "Consulta de orden por id: " + id);
         return ordenRepository.findById(id);
     }
 
     @Override
     public List<OrdenMantenimiento> consultarHistorial() {
+        AuditLogger.log(Level.INFO, "OrdenServiceImpl", "Consulta de historial de ordenes");
         return ordenRepository.findAll().stream()
                 .sorted(Comparator.comparing(
                         OrdenMantenimiento::getFechaProgramada,

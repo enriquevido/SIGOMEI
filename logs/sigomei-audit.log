@@ -1,0 +1,34 @@
+2026-05-23 23:07:45 INFO [TecnicoServiceImpl] Tecnico registrado con id: 5
+2026-05-23 23:07:45 INFO [TecnicoServiceImpl] Consulta de tecnico por id: 5
+2026-05-23 23:07:45 INFO [TecnicoServiceImpl] Consulta de todos los tecnicos
+2026-05-23 23:07:45 INFO [TecnicoServiceImpl] Tecnico modificado con id: 5
+2026-05-23 23:07:45 INFO [TecnicoServiceImpl] Tecnico registrado con id: 6
+2026-05-23 23:07:45 INFO [TecnicoServiceImpl] Tecnico eliminado con id: 6
+2026-05-23 23:07:45 INFO [EquipoServiceImpl] Equipo registrado con id: 5
+2026-05-23 23:07:45 INFO [EquipoServiceImpl] Consulta de equipo por id: 5
+2026-05-23 23:07:45 INFO [EquipoServiceImpl] Consulta de todos los equipos
+2026-05-23 23:07:45 INFO [EquipoServiceImpl] Equipo modificado con id: 5
+2026-05-23 23:07:45 INFO [EquipoServiceImpl] Equipo registrado con id: 6
+2026-05-23 23:07:46 INFO [EquipoServiceImpl] Equipo eliminado con id: 6
+2026-05-23 23:07:46 INFO [EquipoServiceImpl] Consulta de equipo por id: 5
+2026-05-23 23:07:46 INFO [TecnicoServiceImpl] Consulta de tecnico por id: 5
+2026-05-23 23:07:46 INFO [OrdenServiceImpl] Orden creada con id: 5
+2026-05-23 23:07:46 INFO [OrdenServiceImpl] Consulta de orden por id: 5
+2026-05-23 23:07:46 INFO [OrdenServiceImpl] Consulta de historial de ordenes
+2026-05-23 23:07:46 INFO [TecnicoServiceImpl] Tecnico registrado con id: 7
+2026-05-23 23:07:46 INFO [TecnicoServiceImpl] Consulta de tecnico por id: 7
+2026-05-23 23:07:46 INFO [OrdenServiceImpl] Tecnico asignado a orden id: 5
+2026-05-23 23:07:46 INFO [OrdenServiceImpl] Estado de orden 5 cambiado a: EN_EJECUCION
+2026-05-23 23:07:46 INFO [OrdenServiceImpl] Estado de orden 5 cambiado a: FINALIZADA
+2026-05-23 23:07:46 INFO [EquipoServiceImpl] Consulta de equipo por id: 5
+2026-05-23 23:07:46 INFO [TecnicoServiceImpl] Consulta de tecnico por id: 5
+2026-05-23 23:07:46 INFO [OrdenServiceImpl] Orden creada con id: 6
+2026-05-23 23:07:46 INFO [OrdenServiceImpl] Orden cancelada con id: 6
+2026-05-23 23:07:46 INFO [EquipoServiceImpl] Consulta de equipo por id: 5
+2026-05-23 23:07:46 INFO [TecnicoServiceImpl] Consulta de tecnico por id: 5
+2026-05-23 23:07:46 INFO [OrdenServiceImpl] Orden creada con id: 7
+2026-05-23 23:07:46 INFO [EquipoServiceImpl] Consulta de equipo por id: 5
+2026-05-23 23:07:46 INFO [TecnicoServiceImpl] Consulta de tecnico por id: 5
+2026-05-23 23:07:46 INFO [TecnicoServiceImpl] Tecnico registrado con id: 8
+2026-05-23 23:07:46 INFO [EquipoServiceImpl] Consulta de equipo por id: 5
+2026-05-23 23:07:46 INFO [TecnicoServiceImpl] Consulta de tecnico por id: 8

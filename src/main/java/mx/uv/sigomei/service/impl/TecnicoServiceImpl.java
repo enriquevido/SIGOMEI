@@ -11,7 +11,10 @@ import mx.uv.sigomei.exception.ValidacionException;
 import mx.uv.sigomei.repository.OrdenRepository;
 import mx.uv.sigomei.repository.TecnicoRepository;
 import mx.uv.sigomei.service.TecnicoService;
+import mx.uv.sigomei.util.AuditLogger;
 import mx.uv.sigomei.validator.ValidadorReglas;
+
+import java.util.logging.Level;
 
 public class TecnicoServiceImpl implements TecnicoService {
 
@@ -32,7 +35,9 @@ public class TecnicoServiceImpl implements TecnicoService {
         validarTecnico(tecnico);
         validarRfcUnico(tecnico);
 
-        return tecnicoRepository.save(tecnico);
+        Tecnico resultado = tecnicoRepository.save(tecnico);
+        AuditLogger.log(Level.INFO, "TecnicoServiceImpl", "Tecnico registrado con id: " + resultado.getId());
+        return resultado;
     }
 
     @Override
@@ -41,11 +46,13 @@ public class TecnicoServiceImpl implements TecnicoService {
             throw new ValidacionException("El id del tecnico es obligatorio");
         }
 
+        AuditLogger.log(Level.INFO, "TecnicoServiceImpl", "Consulta de tecnico por id: " + id);
         return tecnicoRepository.findById(id);
     }
 
     @Override
     public List<Tecnico> buscarTodos() {
+        AuditLogger.log(Level.INFO, "TecnicoServiceImpl", "Consulta de todos los tecnicos");
         return tecnicoRepository.findAll();
     }
 
@@ -64,7 +71,9 @@ public class TecnicoServiceImpl implements TecnicoService {
 
         validarRfcUnicoAlModificar(tecnico);
 
-        return tecnicoRepository.save(tecnico);
+        Tecnico resultado = tecnicoRepository.save(tecnico);
+        AuditLogger.log(Level.INFO, "TecnicoServiceImpl", "Tecnico modificado con id: " + resultado.getId());
+        return resultado;
     }
 
     @Override
@@ -83,6 +92,7 @@ public class TecnicoServiceImpl implements TecnicoService {
         validadorReglas.validarEliminacionSinOrdenes(ordenesDelTecnico);
 
         tecnicoRepository.deleteById(id);
+        AuditLogger.log(Level.INFO, "TecnicoServiceImpl", "Tecnico eliminado con id: " + id);
     }
 
     private void validarTecnico(Tecnico tecnico) {
