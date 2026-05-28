@@ -3,6 +3,10 @@ CREATE DATABASE sigomei_db
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
+CREATE USER IF NOT EXISTS 'sigomei'@'localhost' IDENTIFIED BY 'sigomei123';
+GRANT ALL PRIVILEGES ON sigomei_db.* TO 'sigomei'@'localhost';
+FLUSH PRIVILEGES;
+
 USE sigomei_db;
 
 CREATE TABLE equipo (
@@ -94,7 +98,7 @@ CREATE TABLE orden_mantenimiento (
         CHECK (
             (estado_orden = 'FINALIZADA' AND fecha_cierre IS NOT NULL AND costo_real IS NOT NULL)
             OR
-            (estado_orden <> 'FINALIZADA' AND fecha_cierre IS NULL AND costo_real IS NULL)
+            (estado_orden <> 'FINALIZADA')
         )
 );
 
@@ -102,3 +106,13 @@ CREATE INDEX idx_orden_equipo ON orden_mantenimiento(id_equipo);
 CREATE INDEX idx_orden_tecnico ON orden_mantenimiento(id_tecnico);
 CREATE INDEX idx_orden_estado ON orden_mantenimiento(estado_orden);
 CREATE INDEX idx_orden_fecha_programada ON orden_mantenimiento(fecha_programada);
+
+CREATE TABLE usuario (
+    id_usuario BIGINT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(80) NOT NULL UNIQUE,
+    password_hash VARCHAR(100) NOT NULL,
+    rol VARCHAR(20) NOT NULL,
+    intentos_fallidos INT NOT NULL DEFAULT 0,
+    bloqueado_hasta DATETIME NULL,
+    CONSTRAINT chk_usuario_rol CHECK (rol IN ('COORDINADOR', 'SUPERVISOR'))
+);

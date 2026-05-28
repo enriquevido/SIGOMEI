@@ -9,6 +9,7 @@ import java.util.Optional;
 import mx.uv.sigomei.domain.Equipo;
 import mx.uv.sigomei.domain.OrdenMantenimiento;
 import mx.uv.sigomei.domain.Tecnico;
+import mx.uv.sigomei.dto.FiltroOrdenDTO;
 import mx.uv.sigomei.enums.EstadoOrden;
 import mx.uv.sigomei.exception.EntidadNoEncontradaException;
 import mx.uv.sigomei.exception.ReglaNegocioException;
@@ -139,13 +140,25 @@ public class OrdenServiceImpl implements OrdenService {
     }
 
     @Override
-    public List<OrdenMantenimiento> consultarHistorial() {
+    public List<OrdenMantenimiento> consultarHistorial(FiltroOrdenDTO filtro) {
         AuditLogger.log(Level.INFO, "OrdenServiceImpl", "Consulta de historial de ordenes");
         return ordenRepository.findAll().stream()
+                .filter(orden -> filtro == null || filtro.getIdEquipo() == null
+                        || filtro.getIdEquipo().equals(orden.getEquipo() == null ? null : orden.getEquipo().getId()))
+                .filter(orden -> filtro == null || filtro.getIdTecnico() == null
+                        || filtro.getIdTecnico().equals(orden.getTecnico() == null ? null : orden.getTecnico().getId()))
+                .filter(orden -> filtro == null || filtro.getEstadoOrden() == null
+                        || filtro.getEstadoOrden() == orden.getEstadoOrden())
+                .filter(orden -> filtro == null || filtro.getFechaDesde() == null
+                        || (orden.getFechaProgramada() != null
+                        && !orden.getFechaProgramada().isBefore(filtro.getFechaDesde())))
+                .filter(orden -> filtro == null || filtro.getFechaHasta() == null
+                        || (orden.getFechaProgramada() != null
+                        && !orden.getFechaProgramada().isAfter(filtro.getFechaHasta())))
                 .sorted(Comparator.comparing(
                         OrdenMantenimiento::getFechaProgramada,
-                        Comparator.nullsLast(Comparator.naturalOrder())
-                ).reversed())
+                        Comparator.nullsLast(Comparator.reverseOrder())
+                ))
                 .toList();
     }
 

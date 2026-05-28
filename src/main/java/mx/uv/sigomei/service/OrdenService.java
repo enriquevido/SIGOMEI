@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import mx.uv.sigomei.domain.OrdenMantenimiento;
 import mx.uv.sigomei.domain.Tecnico;
+import mx.uv.sigomei.dto.FiltroOrdenDTO;
 import mx.uv.sigomei.enums.EstadoOrden;
 
 public interface OrdenService {
@@ -20,5 +21,5 @@ public interface OrdenService {
 
     Optional<OrdenMantenimiento> obtenerPorId(Long id);
 
-    List<OrdenMantenimiento> consultarHistorial();
+    List<OrdenMantenimiento> consultarHistorial(FiltroOrdenDTO filtro);
 }

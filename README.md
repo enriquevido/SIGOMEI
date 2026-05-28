@@ -2,8 +2,8 @@
 
 Sistema Distribuido para la Gestión de Órdenes de Mantenimiento de Equipos Industriales.
 
-Este proyecto implementa una arquitectura cliente-servidor en Java usando RMI.  
-El servidor se conecta a MySQL mediante JDBC y el cliente consume únicamente servicios remotos RMI.
+Este proyecto implementa el servidor Java RMI de SIGOMEI.  
+El servidor se conecta a MySQL mediante JDBC y expone servicios remotos para el cliente JavaFX ubicado en `../sigomei-cliente`.
 
 ---
 
@@ -40,21 +40,23 @@ FLUSH PRIVILEGES;
 
 ## Configuración del servidor
 
-La conexión a la base de datos se configura en el archivo externo:
-
-```text
-config/server.properties
-```
-
-Contenido esperado:
+La conexión RMI y la base de datos se configuran en `config/server.properties`.
 
 ```properties
 rmi.host=127.0.0.1
 rmi.registry.port=1099
+rmi.service.port=1100
 
 rmi.service.equipo=EquipoService
 rmi.service.tecnico=TecnicoService
 rmi.service.orden=OrdenService
+rmi.service.auth=AuthService
+
+rmi.ssl.enabled=true
+rmi.keystore.path=config/server.jks
+rmi.keystore.password=sigomei123
+rmi.truststore.path=config/client.jks
+rmi.truststore.password=sigomei123
 
 db.url=jdbc:mysql://localhost:3306/sigomei_db?useSSL=false&serverTimezone=America/Mexico_City&allowPublicKeyRetrieval=true
 db.user=sigomei
@@ -66,39 +68,15 @@ Las credenciales de la base de datos están en este archivo externo y no están 
 
 ---
 
-## Configuración del cliente
-
-El cliente utiliza el archivo:
-
-```text
-config/client.properties
-```
-
-Contenido esperado:
-
-```properties
-rmi.host=127.0.0.1
-rmi.registry.port=1099
-
-rmi.service.equipo=EquipoService
-rmi.service.tecnico=TecnicoService
-rmi.service.orden=OrdenService
-```
-
-El cliente no contiene datos de conexión a MySQL porque no se conecta directamente a la base de datos.  
-Toda comunicación se realiza mediante servicios remotos RMI.
-
----
-
 ## Compilación
 
-Desde la raíz del proyecto, donde se encuentra el archivo `pom.xml`, ejecutar:
+Desde la raíz del proyecto, donde se encuentra `pom.xml`, ejecutar:
 
 ```powershell
 mvn clean compile
 ```
 
-Después generar el classpath con las dependencias necesarias, incluyendo el driver JDBC de MySQL:
+Después generar el classpath con las dependencias necesarias:
 
 ```powershell
 mvn dependency:build-classpath "-Dmdep.outputFile=cp.txt"
@@ -106,53 +84,75 @@ mvn dependency:build-classpath "-Dmdep.outputFile=cp.txt"
 
 ---
 
-## Ejecución del servidor
+## Ejecución para demo con dos clientes en red
 
-Antes de iniciar el servidor, verificar que MySQL esté encendido y que la base de datos `sigomei_db` exista.
+### En la máquina SERVIDOR
 
-Ejecutar:
+1. Ejecutar el script de generación de keystores (solo primera vez):
 
-```powershell
-$cp = Get-Content cp.txt
-java "-Dsigomei.config=config\server.properties" -cp "target\classes;$cp" mx.uv.sigomei.app.ServidorSigomeiApp
-```
+   ```bash
+   bash scripts/generar-keystores.sh
+   ```
 
-Si el servidor inicia correctamente, se mostrará una salida similar a:
+2. Copiar `config/client.jks` a cada máquina cliente.
+
+3. Verificar que `config/server.properties` tenga:
+
+   ```properties
+   rmi.host=<IP_LAN_DEL_SERVIDOR>
+   rmi.registry.port=1099
+   rmi.service.port=1100
+   rmi.ssl.enabled=true
+   ```
+
+4. Abrir puertos 1099 y 1100 en firewall (Windows: regla de entrada TCP).
+
+5. Iniciar el servidor:
+
+   ```powershell
+   $cp = Get-Content cp.txt
+   java "-Dsigomei.config=config\server.properties" -cp "target\classes;$cp" mx.uv.sigomei.app.ServidorSigomeiApp
+   ```
+
+Salida esperada:
 
 ```text
 Servidor SIGOMEI iniciado correctamente.
-Host RMI: 127.0.0.1
+Host RMI: <IP configurada>
 Puerto RMI Registry: 1099
+Puerto servicios RMI: 1100
+SSL/TLS: habilitado
 Servicio publicado: EquipoService
 Servicio publicado: TecnicoService
 Servicio publicado: OrdenService
+Servicio publicado: AuthService
 Servidor esperando clientes. Presiona Ctrl + C para detenerlo.
 ```
 
-La terminal del servidor debe permanecer abierta mientras se ejecuta el cliente.
+### En cada máquina CLIENTE
 
----
+1. Usar el módulo JavaFX `sigomei-cliente` y colocar ahí el `client.jks` copiado del servidor si SSL está habilitado.
 
-## Ejecución del cliente
+2. Editar `sigomei-cliente/config/client.properties`:
 
-Abrir otra terminal en la raíz del proyecto y ejecutar:
+   ```properties
+   rmi.host=<IP_LAN_DEL_SERVIDOR>
+   rmi.registry.port=1099
+   rmi.ssl.enabled=true
+   rmi.truststore.path=config/client.jks
+   rmi.truststore.password=sigomei123
+   ```
 
-```powershell
-$cp = Get-Content cp.txt
-java "-Dsigomei.client.config=config\client.properties" -cp "target\classes;$cp" mx.uv.sigomei.app.ClienteSigomeiDemoApp
-```
+3. Ejecutar:
 
-El cliente se conectará al servidor mediante RMI y ejecutará operaciones sobre equipos, técnicos y órdenes.
+   ```powershell
+   cd ..\sigomei-cliente
+   mvn javafx:run -Dsigomei.client.config=config/client.properties
+   ```
 
-Una salida correcta debe verse similar a:
+4. Los dos clientes pueden ejecutarse simultáneamente desde terminales distintas o máquinas distintas.
 
-```text
-Equipo registrado: EquipoDTO{...}
-Tecnico registrado: TecnicoDTO{...}
-Orden creada correctamente: OrdenMantenimientoDTO{...}
-Regla rechazada correctamente: RN-02: el equipo ya tiene una orden activa en esa fecha
-Orden actualizada a EN_EJECUCION: OrdenMantenimientoDTO{...}
-```
+Para pruebas locales sin keystores, configurar `rmi.ssl.enabled=false` en servidor y cliente.
 
 ---
 

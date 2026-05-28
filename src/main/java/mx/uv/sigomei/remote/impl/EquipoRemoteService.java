@@ -4,7 +4,12 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
 
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
+
 import mx.uv.sigomei.dto.EquipoDTO;
+import mx.uv.sigomei.enums.Criticidad;
+import mx.uv.sigomei.enums.TipoEquipo;
 import mx.uv.sigomei.exception.EntidadNoEncontradaException;
 import mx.uv.sigomei.mapper.SigomeiMapper;
 import mx.uv.sigomei.remote.IEquipoService;
@@ -15,7 +20,17 @@ public class EquipoRemoteService extends UnicastRemoteObject implements IEquipoS
     private final EquipoService equipoService;
 
     public EquipoRemoteService(EquipoService equipoService) throws RemoteException {
-        super();
+        this(equipoService, false);
+    }
+
+    public EquipoRemoteService(EquipoService equipoService, boolean sslEnabled) throws RemoteException {
+        this(equipoService, 0, sslEnabled);
+    }
+
+    public EquipoRemoteService(EquipoService equipoService, int port, boolean sslEnabled) throws RemoteException {
+        super(port,
+                sslEnabled ? new SslRMIClientSocketFactory() : null,
+                sslEnabled ? new SslRMIServerSocketFactory() : null);
         this.equipoService = equipoService;
     }
 
@@ -32,8 +47,13 @@ public class EquipoRemoteService extends UnicastRemoteObject implements IEquipoS
     }
 
     @Override
-    public List<EquipoDTO> buscarEquipos() throws RemoteException {
-        return equipoService.buscarTodos().stream().map(SigomeiMapper::toEquipoDTO).toList();
+    public List<EquipoDTO> buscarEquipos(String nombre, TipoEquipo tipo, String numeroSerie,
+                                         String ubicacion, String estadoOperativo, Criticidad criticidad)
+            throws RemoteException {
+        return equipoService.buscarConFiltros(nombre, tipo, numeroSerie, ubicacion, estadoOperativo, criticidad)
+                .stream()
+                .map(SigomeiMapper::toEquipoDTO)
+                .toList();
     }
 
     @Override

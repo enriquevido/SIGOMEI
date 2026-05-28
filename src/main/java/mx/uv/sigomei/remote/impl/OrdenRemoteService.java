@@ -6,6 +6,9 @@ import java.rmi.server.UnicastRemoteObject;
 import java.time.LocalDate;
 import java.util.List;
 
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
+
 import mx.uv.sigomei.domain.Equipo;
 import mx.uv.sigomei.domain.Tecnico;
 import mx.uv.sigomei.dto.FiltroOrdenDTO;
@@ -26,7 +29,21 @@ public class OrdenRemoteService extends UnicastRemoteObject implements IOrdenSer
 
     public OrdenRemoteService(OrdenService ordenService, EquipoService equipoService, TecnicoService tecnicoService)
             throws RemoteException {
-        super();
+        this(ordenService, equipoService, tecnicoService, false);
+    }
+
+    public OrdenRemoteService(OrdenService ordenService, EquipoService equipoService, TecnicoService tecnicoService,
+                              boolean sslEnabled)
+            throws RemoteException {
+        this(ordenService, equipoService, tecnicoService, 0, sslEnabled);
+    }
+
+    public OrdenRemoteService(OrdenService ordenService, EquipoService equipoService, TecnicoService tecnicoService,
+                              int port, boolean sslEnabled)
+            throws RemoteException {
+        super(port,
+                sslEnabled ? new SslRMIClientSocketFactory() : null,
+                sslEnabled ? new SslRMIServerSocketFactory() : null);
         this.ordenService = ordenService;
         this.equipoService = equipoService;
         this.tecnicoService = tecnicoService;
@@ -66,17 +83,7 @@ public class OrdenRemoteService extends UnicastRemoteObject implements IOrdenSer
 
     @Override
     public List<OrdenMantenimientoDTO> consultarHistorial(FiltroOrdenDTO filtro) throws RemoteException {
-        return ordenService.consultarHistorial().stream()
-                .filter(orden -> filtro == null || filtro.getIdEquipo() == null
-                        || filtro.getIdEquipo().equals(orden.getEquipo() == null ? null : orden.getEquipo().getId()))
-                .filter(orden -> filtro == null || filtro.getIdTecnico() == null
-                        || filtro.getIdTecnico().equals(orden.getTecnico() == null ? null : orden.getTecnico().getId()))
-                .filter(orden -> filtro == null || filtro.getEstadoOrden() == null
-                        || filtro.getEstadoOrden() == orden.getEstadoOrden())
-                .filter(orden -> filtro == null || filtro.getFechaDesde() == null
-                        || !orden.getFechaProgramada().isBefore(filtro.getFechaDesde()))
-                .filter(orden -> filtro == null || filtro.getFechaHasta() == null
-                        || !orden.getFechaProgramada().isAfter(filtro.getFechaHasta()))
+        return ordenService.consultarHistorial(filtro).stream()
                 .map(SigomeiMapper::toOrdenDTO)
                 .toList();
     }

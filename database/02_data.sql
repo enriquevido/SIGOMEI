@@ -182,3 +182,7 @@ INSERT INTO orden_mantenimiento (
     NULL,
     'PROGRAMADA'
 );
+
+INSERT INTO usuario (username, password_hash, rol) VALUES
+('coordinador01', '$2a$10$5PH8co9BBBi/x0Jx.rwTzegxxslJ4irwPldhmVu4TyrJ/4Zx/D6EW', 'COORDINADOR'),
+('supervisor01',  '$2a$10$5PH8co9BBBi/x0Jx.rwTzegxxslJ4irwPldhmVu4TyrJ/4Zx/D6EW', 'SUPERVISOR');

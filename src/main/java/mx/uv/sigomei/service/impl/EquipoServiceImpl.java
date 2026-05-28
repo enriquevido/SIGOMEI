@@ -1,10 +1,13 @@
 package mx.uv.sigomei.service.impl;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import mx.uv.sigomei.domain.Equipo;
 import mx.uv.sigomei.domain.OrdenMantenimiento;
+import mx.uv.sigomei.enums.Criticidad;
+import mx.uv.sigomei.enums.TipoEquipo;
 import mx.uv.sigomei.exception.EntidadDuplicadaException;
 import mx.uv.sigomei.exception.EntidadNoEncontradaException;
 import mx.uv.sigomei.exception.ValidacionException;
@@ -54,6 +57,20 @@ public class EquipoServiceImpl implements EquipoService {
     public List<Equipo> buscarTodos() {
         AuditLogger.log(Level.INFO, "EquipoServiceImpl", "Consulta de todos los equipos");
         return equipoRepository.findAll();
+    }
+
+    @Override
+    public List<Equipo> buscarConFiltros(String nombre, TipoEquipo tipo, String numeroSerie,
+                                         String ubicacion, String estadoOperativo, Criticidad criticidad) {
+        AuditLogger.log(Level.INFO, "EquipoServiceImpl", "Consulta de equipos con filtros");
+        return equipoRepository.findAll().stream()
+                .filter(equipo -> contieneIgnorandoMayusculas(equipo.getNombre(), nombre))
+                .filter(equipo -> tipo == null || equipo.getTipo() == tipo)
+                .filter(equipo -> contieneIgnorandoMayusculas(equipo.getNumeroSerie(), numeroSerie))
+                .filter(equipo -> contieneIgnorandoMayusculas(equipo.getUbicacionPlanta(), ubicacion))
+                .filter(equipo -> contieneIgnorandoMayusculas(equipo.getEstadoOperativo(), estadoOperativo))
+                .filter(equipo -> criticidad == null || equipo.getCriticidad() == criticidad)
+                .toList();
     }
 
     @Override
@@ -164,5 +181,15 @@ public class EquipoServiceImpl implements EquipoService {
 
     private boolean esBlanco(String valor) {
         return valor == null || valor.trim().isEmpty();
+    }
+
+    private boolean contieneIgnorandoMayusculas(String valor, String filtro) {
+        if (esBlanco(filtro)) {
+            return true;
+        }
+        if (valor == null) {
+            return false;
+        }
+        return valor.toLowerCase(Locale.ROOT).contains(filtro.trim().toLowerCase(Locale.ROOT));
     }
 }

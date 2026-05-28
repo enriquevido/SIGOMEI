@@ -1,10 +1,14 @@
 package mx.uv.sigomei.service.impl;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import mx.uv.sigomei.domain.OrdenMantenimiento;
 import mx.uv.sigomei.domain.Tecnico;
+import mx.uv.sigomei.enums.EstatusTecnico;
+import mx.uv.sigomei.enums.NivelCertificacion;
+import mx.uv.sigomei.enums.TipoEquipo;
 import mx.uv.sigomei.exception.EntidadDuplicadaException;
 import mx.uv.sigomei.exception.EntidadNoEncontradaException;
 import mx.uv.sigomei.exception.ValidacionException;
@@ -54,6 +58,18 @@ public class TecnicoServiceImpl implements TecnicoService {
     public List<Tecnico> buscarTodos() {
         AuditLogger.log(Level.INFO, "TecnicoServiceImpl", "Consulta de todos los tecnicos");
         return tecnicoRepository.findAll();
+    }
+
+    @Override
+    public List<Tecnico> buscarConFiltros(String nombre, TipoEquipo especialidad,
+                                          NivelCertificacion nivel, EstatusTecnico estatus) {
+        AuditLogger.log(Level.INFO, "TecnicoServiceImpl", "Consulta de tecnicos con filtros");
+        return tecnicoRepository.findAll().stream()
+                .filter(tecnico -> contieneIgnorandoMayusculas(tecnico.getNombreCompleto(), nombre))
+                .filter(tecnico -> especialidad == null || tecnico.getEspecialidad() == especialidad)
+                .filter(tecnico -> nivel == null || tecnico.getNivelCertificacion() == nivel)
+                .filter(tecnico -> estatus == null || tecnico.getEstatus() == estatus)
+                .toList();
     }
 
     @Override
@@ -176,5 +192,15 @@ public class TecnicoServiceImpl implements TecnicoService {
 
     private boolean esBlanco(String valor) {
         return valor == null || valor.trim().isEmpty();
+    }
+
+    private boolean contieneIgnorandoMayusculas(String valor, String filtro) {
+        if (esBlanco(filtro)) {
+            return true;
+        }
+        if (valor == null) {
+            return false;
+        }
+        return valor.toLowerCase(Locale.ROOT).contains(filtro.trim().toLowerCase(Locale.ROOT));
     }
 }

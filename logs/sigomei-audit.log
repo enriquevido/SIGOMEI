@@ -32,3 +32,22 @@
 2026-05-23 23:07:46 INFO [TecnicoServiceImpl] Tecnico registrado con id: 8
 2026-05-23 23:07:46 INFO [EquipoServiceImpl] Consulta de equipo por id: 5
 2026-05-23 23:07:46 INFO [TecnicoServiceImpl] Consulta de tecnico por id: 8
+2026-05-27 22:53:51 INFO [OrdenServiceImpl] Consulta de historial de ordenes
+2026-05-27 22:53:51 INFO [EquipoServiceImpl] Consulta de equipos con filtros
+2026-05-27 22:53:51 INFO [TecnicoServiceImpl] Consulta de tecnicos con filtros
+2026-05-27 22:53:56 INFO [EquipoServiceImpl] Consulta de equipos con filtros
+2026-05-27 22:53:56 INFO [TecnicoServiceImpl] Consulta de tecnicos con filtros
+2026-05-27 22:53:56 INFO [OrdenServiceImpl] Consulta de historial de ordenes
+2026-05-27 22:53:57 INFO [EquipoServiceImpl] Consulta de equipos con filtros
+2026-05-27 22:53:58 INFO [TecnicoServiceImpl] Consulta de tecnicos con filtros
+2026-05-27 22:53:58 INFO [EquipoServiceImpl] Consulta de equipos con filtros
+2026-05-27 22:53:58 INFO [OrdenServiceImpl] Consulta de historial de ordenes
+2026-05-27 22:53:58 INFO [TecnicoServiceImpl] Consulta de tecnicos con filtros
+2026-05-27 22:54:01 INFO [TecnicoServiceImpl] Consulta de tecnicos con filtros
+2026-05-27 22:54:01 INFO [EquipoServiceImpl] Consulta de equipos con filtros
+2026-05-27 22:54:01 INFO [TecnicoServiceImpl] Consulta de tecnicos con filtros
+2026-05-27 22:54:01 INFO [OrdenServiceImpl] Consulta de historial de ordenes
+2026-05-27 22:54:02 INFO [EquipoServiceImpl] Consulta de equipos con filtros
+2026-05-27 22:54:03 INFO [OrdenServiceImpl] Consulta de historial de ordenes
+2026-05-27 22:54:03 INFO [EquipoServiceImpl] Consulta de equipos con filtros
+2026-05-27 22:54:03 INFO [TecnicoServiceImpl] Consulta de tecnicos con filtros

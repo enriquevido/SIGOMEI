@@ -1,5 +1,8 @@
 # Maven
 target/
+*.jks
+*.log
+*.lck
 
 # IntelliJ IDEA
 .idea/
@@ -18,4 +21,3 @@ Icon
 .Spotlight-V100
 .Trashes
 cp.txt
-
